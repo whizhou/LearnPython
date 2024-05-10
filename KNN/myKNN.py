@@ -9,11 +9,20 @@
 import csv
 import numpy as np
 import operator
+import random
 
 
 # TODO: 构建 KNN 分类器
 # inX 用于接受分类的 NumPy 数组，dataSet 为训练样本集，labels 为对应标签，k 表示选择最近邻居的数目
 def classify0(inX, dataSet, labels, k):
+    """
+    Classify data
+    :param inX: ndarray, 分类集
+    :param dataSet: ndarray, 训练样本集
+    :param labels: list, 样本集对应的标签
+    :param k: 选择最近邻居的数目
+    :return: 预测的标签
+    """
     dataSetSize = dataSet.shape[0]  # 获取样本数量
     diffMat = np.tile(inX, (dataSetSize, 1)) - dataSet
     # 手动扩展分类集以匹配样本集
@@ -35,11 +44,22 @@ def classify0(inX, dataSet, labels, k):
 
 # TODO: 加载数据
 def file2matrix(filename):
+    """
+    :param filename:
+    :return: dataSet, labels, headers
+    """
     with open(filename, newline='') as csvfile:
         csvreader = csv.reader(csvfile, delimiter=',')
-        dataSet = np.array(csvreader[1:, 0:3])  # 创建 ndarray 对象存储特征值
-        labels = list(csvreader[1:, 4])  # 创建存放标签的列表
-        headers = list(csvreader[0, 0:4])  # 创建存放表头的列表
+        data = list(csvreader)
+
+        headers = data[0]
+        data = data[1:]  # 去除数据的表头部分
+
+        # dataSet = np.array(data[1:][:4])  # 创建 ndarray 对象存储特征值
+        dataSet = np.array([row[:4] for row in data])
+        labels = [row[4] for row in data]
+        # labels = list(data[1:][4])  # 创建存放标签的列表
+        # headers = list(data[0][:4])  # 创建存放表头的列表
 
     return dataSet, labels, headers
 
@@ -51,7 +71,58 @@ def autoNorm(dataSet):
     ranges = maxVals - minVals
     normDataSet = dataSet - minVals
     normDataSet /= ranges
+    # 利用广播机制计算
     return normDataSet, ranges, minVals, maxVals
 
 # TODO: 数据集划分
+def dataSetSplit(dataSet, labels, testRatio=0.2):
+    """
+    使用索引随机排序来重新排列 dataSet 和 labels，并划分数据集
+    :param dataSet: ndarray, 包含所有样本的特征数据
+    :param labels: list, 每个样本对应的标签
+    :param testRatio:
+    :return: xTrain, yTrain, xTest, yTest
+    """
+    dataSize = dataSet.shape[0]  # 获取数据集长度
 
+    indices = list(range(dataSize))
+    random.shuffle(indices)
+    # 创建一个随机排列
+
+    shuffledDataSet = dataSet[indices]
+    shuffledLabels = [labels[i] for i in indices]
+    # 随机排列 dataSet 和 labels
+
+    numTest = int(dataSize * testRatio)
+    xTest, yTest = shuffledDataSet[:numTest], shuffledLabels[:numTest]
+    xTrain, yTrain = shuffledDataSet[numTest:], shuffledLabels[numTest:]
+    # 划分训练集和测试集
+
+    return xTrain, yTrain, xTest, yTest
+
+# TODO: 测试分类器性能
+def KNNTest(filename, k, testRatio=0.2):
+    """
+    首先读入数据，进行标准化；
+    然后划分训练集和测试集，进行预测；
+    输出准确度和错误个数
+    :param filename:
+    :param k:
+    :return:
+    """
+
+    dataSet, labels, headers = file2matrix(filename)
+    normdataSet = autoNorm(dataSet)
+    xTrain, yTrain, xTest, yTest = dataSetSplit(dataSet, labels, testRatio)
+
+    yForecast = classify0(yTest, xTrain, yTrain, k)
+    errorCount = sum(x != y for x, y in zip(yTest, yForecast))
+
+    numTrain = int(dataSet.shape[0] * (1 - testRatio))
+    print("The total error rate is: ", errorCount / float(numTrain))
+    print("The total error number is:", errorCount)
+
+filename = 'iris.csv'
+k = 3
+testRatio = 0.2
+KNNTest(filename, k, testRatio)
