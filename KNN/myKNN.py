@@ -57,8 +57,9 @@ def file2matrix(filename):
         data = data[1:]  # 去除数据的表头部分
 
         # dataSet = np.array(data[1:][:4])  # 创建 ndarray 对象存储特征值
-        dataSet = np.array([row[:4] for row in data], dtype=float)
-        labels = [row[4] for row in data]
+        dataSet = np.array([row[:-1] for row in data], dtype=float)
+        # 这里需要指定dtype，否则函数自动推断类型会有误
+        labels = [row[-1] for row in data]
         # labels = list(data[1:][4])  # 创建存放标签的列表
         # headers = list(data[0][:4])  # 创建存放表头的列表
 
@@ -73,7 +74,7 @@ def autoNorm(dataSet):
     normDataSet = dataSet - minVals
     normDataSet /= ranges
     # 利用广播机制计算
-    return normDataSet
+    return normDataSet, minVals, ranges
 
 # TODO: 数据集划分
 def dataSetSplit(dataSet, labels, testRatio=0.2):
@@ -112,18 +113,20 @@ def KNNTest(filename, k, testRatio=0.2):
     :return:
     """
 
+    print("\nTest the classifier performance on " + filename)
+
     dataSet, labels, headers = file2matrix(filename)
-    normdataSet = autoNorm(dataSet)
+    normdataSet, minVals, ranges = autoNorm(dataSet)
     xTrain, yTrain, xTest, yTest = dataSetSplit(normdataSet, labels, testRatio)
 
     errorCount = 0
     for x, y in zip(xTest, yTest):
         yForecast = classify0(x, xTrain, yTrain, k)
         errorCount += yForecast != y
-        print("The classifier came back with %s, the real answer is: %s" % (yForecast, y))
+        # print("The classifier came back with %s, the real answer is: %s" % (yForecast, y))
 
     numTrain = int(dataSet.shape[0] * (1 - testRatio))
-    print("The total error rate is: ", errorCount / float(numTrain))
+    print("The total error rate is: {:.2%}".format(errorCount / float(numTrain)))
     print("The total error number is:", errorCount)
 
 # TODO: 应用分类器
@@ -131,16 +134,47 @@ def classifyFlowers(dataFile, forecastFile, k):
     """
     从CSV文件中读取10个鸢尾花的数据，预测并输出比较结果
     :param dataFile: 数据集文件
-    :param forecastFile: 测试集文件
+    :param forecastFile: 分类集文件，表头与dataFile相同
     :param k:
     :return: None
     """
-    dataSet, labels, headers = file2matrix(dataFile)
-    normdataSet = autoNorm(dataSet)
 
-    with open(forecastFile, newline='') as ~
+    print("Applying classifier on", forecastFile)
+
+    dataSet, labels, headers = file2matrix(dataFile)
+    normdataSet, minVals, ranges = autoNorm(dataSet)
+
+    # 读取分类集数据
+    with open(forecastFile, newline='') as csvfile:
+        reader = csv.reader(csvfile)
+        data = list(reader)
+
+        headers = data[0]
+        data = data[1:]
+        # 获取并去除表头
+
+        flowers = np.array([row[:4] for row in data], dtype=float)
+        names = [row[4] for row in data]
+
+    flowers = (flowers - minVals) / ranges
+    # 使用训练集参数，对测试集进行归一化
+
+    # 进行预测
+    for x, y in zip(flowers, names):
+        flowerForecast = classify0(x, normdataSet, labels, k)
+        print("The classifier came back with %s, the real flower is: %s" % (flowerForecast, y))
+
 
 filename = 'iris.csv'
-k = 5
+k = 3
 testRatio = 0.2
-KNNTest(filename, k, testRatio)
+testfilename = 'simulated_iris_data0.csv'
+
+# 首先随机测试5次分类器
+print("Test the classifier with k = %d, test_ratio = %.2f" % (k, testRatio))
+for _ in range(4):
+    KNNTest(filename, k, testRatio)
+
+# 应用分类器分类
+print("\nApplying classifier")
+classifyFlowers(filename, testfilename, k)
