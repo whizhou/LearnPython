@@ -17,12 +17,13 @@ import random
 def classify0(inX, dataSet, labels, k):
     """
     Classify data
-    :param inX: ndarray, 分类集
+    :param inX: ndarray, 分类数据
     :param dataSet: ndarray, 训练样本集
     :param labels: list, 样本集对应的标签
     :param k: 选择最近邻居的数目
     :return: 预测的标签
     """
+    # numTestSamples = inX.shape[0]  # 获取分类集大小
     dataSetSize = dataSet.shape[0]  # 获取样本数量
     diffMat = np.tile(inX, (dataSetSize, 1)) - dataSet
     # 手动扩展分类集以匹配样本集
@@ -56,7 +57,7 @@ def file2matrix(filename):
         data = data[1:]  # 去除数据的表头部分
 
         # dataSet = np.array(data[1:][:4])  # 创建 ndarray 对象存储特征值
-        dataSet = np.array([row[:4] for row in data])
+        dataSet = np.array([row[:4] for row in data], dtype=float)
         labels = [row[4] for row in data]
         # labels = list(data[1:][4])  # 创建存放标签的列表
         # headers = list(data[0][:4])  # 创建存放表头的列表
@@ -72,7 +73,7 @@ def autoNorm(dataSet):
     normDataSet = dataSet - minVals
     normDataSet /= ranges
     # 利用广播机制计算
-    return normDataSet, ranges, minVals, maxVals
+    return normDataSet
 
 # TODO: 数据集划分
 def dataSetSplit(dataSet, labels, testRatio=0.2):
@@ -113,16 +114,33 @@ def KNNTest(filename, k, testRatio=0.2):
 
     dataSet, labels, headers = file2matrix(filename)
     normdataSet = autoNorm(dataSet)
-    xTrain, yTrain, xTest, yTest = dataSetSplit(dataSet, labels, testRatio)
+    xTrain, yTrain, xTest, yTest = dataSetSplit(normdataSet, labels, testRatio)
 
-    yForecast = classify0(yTest, xTrain, yTrain, k)
-    errorCount = sum(x != y for x, y in zip(yTest, yForecast))
+    errorCount = 0
+    for x, y in zip(xTest, yTest):
+        yForecast = classify0(x, xTrain, yTrain, k)
+        errorCount += yForecast != y
+        print("The classifier came back with %s, the real answer is: %s" % (yForecast, y))
 
     numTrain = int(dataSet.shape[0] * (1 - testRatio))
     print("The total error rate is: ", errorCount / float(numTrain))
     print("The total error number is:", errorCount)
 
+# TODO: 应用分类器
+def classifyFlowers(dataFile, forecastFile, k):
+    """
+    从CSV文件中读取10个鸢尾花的数据，预测并输出比较结果
+    :param dataFile: 数据集文件
+    :param forecastFile: 测试集文件
+    :param k:
+    :return: None
+    """
+    dataSet, labels, headers = file2matrix(dataFile)
+    normdataSet = autoNorm(dataSet)
+
+    with open(forecastFile, newline='') as ~
+
 filename = 'iris.csv'
-k = 3
+k = 5
 testRatio = 0.2
 KNNTest(filename, k, testRatio)
