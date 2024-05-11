@@ -153,8 +153,8 @@ def classifyFlowers(dataFile, forecastFile, k):
         data = data[1:]
         # 获取并去除表头
 
-        flowers = np.array([row[:4] for row in data], dtype=float)
-        names = [row[4] for row in data]
+        flowers = np.array([row[:-1] for row in data], dtype=float)
+        names = [row[-1] for row in data]
 
     flowers = (flowers - minVals) / ranges
     # 使用训练集参数，对测试集进行归一化
