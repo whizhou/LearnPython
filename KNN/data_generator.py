@@ -22,7 +22,9 @@ def generate_similar_samples(base_samples, labels, num_samples=10):
             # 添加随机扰动
             perturbation = np.random.normal(0, 0.1, base_samples[index].shape)
             new_sample = base_samples[index] + perturbation
-            new_samples.append(np.append(new_sample, labels[index]))
+            # 将新样本四舍五入到一位小数
+            new_sample_rounded = np.round(new_sample, 1)
+            new_samples.append(np.append(new_sample_rounded, labels[index]))
 
     # 将数据转换为 DataFrame
     new_samples_df = pd.DataFrame(new_samples,
