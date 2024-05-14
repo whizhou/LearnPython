@@ -125,8 +125,8 @@ def KNNTest(filename, k, testRatio=0.2):
         errorCount += yForecast != y
         # print("The classifier came back with %s, the real answer is: %s" % (yForecast, y))
 
-    numTrain = int(dataSet.shape[0] * (1 - testRatio))
-    print("The total error rate is: {:.2%}".format(errorCount / float(numTrain)))
+    numTest = int(dataSet.shape[0] * testRatio)
+    print("The total error rate is: {:.2%}".format(errorCount / float(numTest)))
     print("The total error number is:", errorCount)
 
 # TODO: 应用分类器
@@ -166,7 +166,7 @@ def classifyFlowers(dataFile, forecastFile, k):
 
 
 filename = 'iris.csv'
-k = 3
+k = 5
 testRatio = 0.2
 testfilename = 'simulated_iris_data0.csv'
 
@@ -177,4 +177,4 @@ for _ in range(4):
 
 # 应用分类器分类
 print("\nApplying classifier")
-classifyFlowers(filename, testfilename, k)
+# classifyFlowers(filename, testfilename, k)
