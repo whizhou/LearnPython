@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8369ce5a-6fbb-4ddf-a2ee-ac846bddbc3f" name="Changes" comment="update 5_11 21:11">
+    <list default="true" id="8369ce5a-6fbb-4ddf-a2ee-ac846bddbc3f" name="Changes" comment="update 5_15 20:25">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/KNN/myKNN.py" beforeDir="false" afterPath="$PROJECT_DIR$/KNN/myKNN.py" afterDir="false" />
     </list>
@@ -22,6 +22,11 @@
   </component>
   <component name="Git.Settings">
     <branch-grouping />
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
@@ -54,7 +59,7 @@
     &quot;Python.myKNN.executor&quot;: &quot;Run&quot;,
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;weight-by-distances&quot;,
     &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
@@ -117,7 +122,10 @@
       <workItem from="1715352305110" duration="5919000" />
       <workItem from="1715403048610" duration="1849000" />
       <workItem from="1715420857981" duration="6810000" />
-      <workItem from="1715651895964" duration="122000" />
+      <workItem from="1715651895964" duration="205000" />
+      <workItem from="1715770624880" duration="985000" />
+      <workItem from="1715771631610" duration="2619000" />
+      <workItem from="1715775804353" duration="1523000" />
     </task>
     <task id="LOCAL-00001" summary="establish">
       <option name="closed" value="true" />
@@ -263,7 +271,39 @@
       <option name="project" value="LOCAL" />
       <updated>1715433230614</updated>
     </task>
-    <option name="localTasksCounter" value="19" />
+    <task id="LOCAL-00019" summary="update 5_14 10:00">
+      <option name="closed" value="true" />
+      <created>1715652083569</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1715652083570</updated>
+    </task>
+    <task id="LOCAL-00020" summary="update 5_15 18:57">
+      <option name="closed" value="true" />
+      <created>1715770671335</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1715770671335</updated>
+    </task>
+    <task id="LOCAL-00021" summary="update 5_15 19:51">
+      <option name="closed" value="true" />
+      <created>1715773928253</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1715773928253</updated>
+    </task>
+    <task id="LOCAL-00022" summary="update 5_15 20:25">
+      <option name="closed" value="true" />
+      <created>1715775936935</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1715775936935</updated>
+    </task>
+    <option name="localTasksCounter" value="23" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -296,7 +336,11 @@
     <MESSAGE value="update 5_11 21:00" />
     <MESSAGE value="update 5_11 21:05" />
     <MESSAGE value="update 5_11 21:11" />
-    <option name="LAST_COMMIT_MESSAGE" value="update 5_11 21:11" />
+    <MESSAGE value="update 5_14 10:00" />
+    <MESSAGE value="update 5_15 18:57" />
+    <MESSAGE value="update 5_15 19:51" />
+    <MESSAGE value="update 5_15 20:25" />
+    <option name="LAST_COMMIT_MESSAGE" value="update 5_15 20:25" />
   </component>
   <component name="XDebuggerManager">
     <watches-manager>
@@ -306,8 +350,8 @@
     </watches-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/LearnPython$myKNN.coverage" NAME="myKNN Coverage Results" MODIFIED="1715652016587" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/KNN" />
+    <SUITE FILE_PATH="coverage/LearnPython$myKNN.coverage" NAME="myKNN Coverage Results" MODIFIED="1715781330752" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/KNN" />
     <SUITE FILE_PATH="coverage/LearnPython$data_generator.coverage" NAME="data_generator Coverage Results" MODIFIED="1715433144293" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/KNN" />
-    <SUITE FILE_PATH="coverage/LearnPython$main.coverage" NAME="main Coverage Results" MODIFIED="1715420895362" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/LearnPython$main.coverage" NAME="main Coverage Results" MODIFIED="1715775975886" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

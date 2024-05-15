@@ -12,7 +12,7 @@ import operator
 import random
 
 
-# TODO: 构建 KNN 分类器
+# 构建 KNN 分类器
 # inX 用于接受分类的 NumPy 数组，dataSet 为训练样本集，labels 为对应标签，k 表示选择最近邻居的数目
 def classify0(inX, dataSet, labels, k):
     """
@@ -43,7 +43,41 @@ def classify0(inX, dataSet, labels, k):
     return sortedClassCount[0][0]
 
 
-# TODO: 加载数据
+# TODO: 距离权值优化
+def f(x, a=1.0, b=1.0):
+    return a / (x + b)
+
+
+def classify1(inX, dataSet, labels, k):
+    """
+        分类器，使用距离权值优化，距离越近权值越大
+        :param inX: ndarray, 分类数据
+        :param dataSet: ndarray, 训练样本集
+        :param labels: list, 样本集对应的标签
+        :param k: 选择最近邻居的数目
+        :return: 预测的标签
+        """
+    # numTestSamples = inX.shape[0]  # 获取分类集大小
+    dataSetSize = dataSet.shape[0]  # 获取样本数量
+    diffMat = np.tile(inX, (dataSetSize, 1)) - dataSet
+    # 手动扩展分类集以匹配样本集
+    sqDiffMat = diffMat ** 2
+    sqDistances = sqDiffMat.sum(axis=1)
+    distances = sqDistances ** .5
+    # 计算距离
+    sortedDistIndicies = distances.argsort()
+    # argsort() 返回将数组值升序排序后的索引值
+    classCount = {}
+    for i in range(k):
+        voteIlabel = labels[sortedDistIndicies[i]]
+        classCount[voteIlabel] = classCount.get(voteIlabel, 0) + f(distances[sortedDistIndicies[i]])
+        # classCount 加上加权距离
+    # 使用字典统计标签出现的频率
+    sortedClassCount = sorted(classCount.items(), key=operator.itemgetter(1), reverse=True)
+    # 按照出现频率逆序排列，返回频率最高的类标签
+    return sortedClassCount[0][0]
+
+# 加载数据
 def file2matrix(filename):
     """
     :param filename:
@@ -66,7 +100,7 @@ def file2matrix(filename):
     return dataSet, labels, headers
 
 
-# TODO: 数据预处理 MinMax归一化
+# 数据预处理 MinMax归一化
 def autoNorm(dataSet):
     minVals = dataSet.min(axis=0)  # 按列统计所有列的最小值
     maxVals = dataSet.max(axis=0)
@@ -76,7 +110,7 @@ def autoNorm(dataSet):
     # 利用广播机制计算
     return normDataSet, minVals, ranges
 
-# TODO: 数据集划分
+# 数据集划分
 def dataSetSplit(dataSet, labels, testRatio=0.2):
     """
     使用索引随机排序来重新排列 dataSet 和 labels，并划分数据集
@@ -102,22 +136,18 @@ def dataSetSplit(dataSet, labels, testRatio=0.2):
 
     return xTrain, yTrain, xTest, yTest
 
-# TODO: 测试分类器性能
-def KNNTest(filename, k, testRatio=0.2):
-    """
-    首先读入数据，进行标准化；
-    然后划分训练集和测试集，进行预测；
-    输出准确度和错误个数
-    :param filename:
-    :param k:
-    :return:
-    """
 
-    print("\nTest the classifier performance on " + filename)
+# TODO 单次测试分类器
 
-    dataSet, labels, headers = file2matrix(filename)
-    normdataSet, minVals, ranges = autoNorm(dataSet)
-    xTrain, yTrain, xTest, yTest = dataSetSplit(normdataSet, labels, testRatio)
+def Test0(dataSet, labels, testRatio=0.2):
+    '''
+    随机划分测试集和训练集，返回错误个数和错误率
+    :param dataSet:
+    :param labels:
+    :param testRatio:
+    :return: errorCount, errorRate
+    '''
+    xTrain, yTrain, xTest, yTest = dataSetSplit(dataSet, labels, testRatio)
 
     errorCount = 0
     for x, y in zip(xTest, yTest):
@@ -126,10 +156,132 @@ def KNNTest(filename, k, testRatio=0.2):
         # print("The classifier came back with %s, the real answer is: %s" % (yForecast, y))
 
     numTest = int(dataSet.shape[0] * testRatio)
-    print("The total error rate is: {:.2%}".format(errorCount / float(numTest)))
-    print("The total error number is:", errorCount)
+    # print("numTest is", numTest)
+    # print("The total error rate is: {:.2%}".format(errorCount / float(numTest)))
+    # print("The total error number is:", errorCount)
+    return errorCount, errorCount / float(numTest)
 
-# TODO: 应用分类器
+
+# TODO 单次测试分类器，加权距离优化
+def Test1(dataSet, labels, testRatio=0.2):
+    '''
+    随机划分测试集和训练集，返回错误个数和错误率
+    :param dataSet:
+    :param labels:
+    :param testRatio:
+    :return: errorCount, errorRate
+    '''
+    xTrain, yTrain, xTest, yTest = dataSetSplit(dataSet, labels, testRatio)
+
+    errorCount = 0
+    for x, y in zip(xTest, yTest):
+        yForecast = classify1(x, xTrain, yTrain, k)
+        errorCount += yForecast != y
+        # print("The classifier came back with %s, the real answer is: %s" % (yForecast, y))
+
+    numTest = int(dataSet.shape[0] * testRatio)
+    # print("numTest is", numTest)
+    # print("The total error rate is: {:.2%}".format(errorCount / float(numTest)))
+    # print("The total error number is:", errorCount)
+    return errorCount, errorCount / float(numTest)
+
+# 测试普通分类器性能
+def KNNTest0(filename, k, testRatio=0.2, testTimes = 10):
+    """
+    首先读入数据，进行标准化；
+    然后进行10次随机划分测试，输出每次错误个数和错误率；
+    最后输出总错误个数以及平均错误率；
+    :param filename:
+    :param k:
+    :return:
+    """
+
+    print("\nTest the classifier performance on " + filename)
+    print("parameter: k = {:}, test ratio = {:}".format(k, testRatio))
+
+    dataSet, labels, headers = file2matrix(filename)
+    normdataSet, minVals, ranges = autoNorm(dataSet)
+
+    totalErrorCount = 0
+    averageErrorRate = 0.0
+    for _ in range(0, testTimes):
+        errorCount, errorRate = Test0(normdataSet, labels, testRatio)
+
+        # print("The {:}th error number is: {:}, error rate is: {:.2%}".format(_ + 1, errorCount, errorRate))
+
+        totalErrorCount += errorCount
+        averageErrorRate += errorRate / float(testTimes)
+
+    print("The total error times is: ", totalErrorCount)
+    print("The average error rate is: {:.2%}".format(averageErrorRate))
+
+
+# 测试加权优化分类器性能
+def KNNTest1(filename, k, testRatio=0.2, testTimes = 10):
+    """
+    首先读入数据，进行标准化；
+    然后进行10次随机划分测试，输出每次错误个数和错误率；
+    最后输出总错误个数以及平均错误率；
+    :param filename:
+    :param k:
+    :return:
+    """
+
+    print("\nTest the classifier performance on " + filename + " with optimization")
+    print("parameter: k = {:}, test ratio = {:}".format(k, testRatio))
+
+    dataSet, labels, headers = file2matrix(filename)
+    normdataSet, minVals, ranges = autoNorm(dataSet)
+
+    totalErrorCount = 0
+    averageErrorRate = 0.0
+    for _ in range(0, testTimes):
+        errorCount, errorRate = Test1(normdataSet, labels, testRatio)
+
+        # print("The {:}th error number is: {:}, error rate is: {:.2%}".format(_ + 1, errorCount, errorRate))
+
+        totalErrorCount += errorCount
+        averageErrorRate += errorRate / float(testTimes)
+
+    print("The total error times is: ", totalErrorCount)
+    print("The average error rate is: {:.2%}".format(averageErrorRate))
+
+# 对比普通分类器和加权距离优化分类器性能
+# TODO 测试加权优化分类器性能
+def KNNTest01(filename, k, testRatio=0.2, testTimes = 10):
+    """
+    使用相同的数据集划分对两种分类器进行性能测试，并进行对比
+    首先读入数据，进行标准化；
+    然后进行10次随机划分测试，输出每次错误个数和错误率；
+    最后输出总错误个数以及平均错误率；
+    :param filename:
+    :param k:
+    :return:
+    """
+
+    print("\n With parameter: k = {:}, test ratio = {:}".format(k, testRatio))
+
+    dataSet, labels, headers = file2matrix(filename)
+    normdataSet, minVals, ranges = autoNorm(dataSet)
+
+    totalErrorCount0 = 0
+    averageErrorRate0 = 0.0
+    totalErrorCount1 = 0
+    averageErrorRate1 = 0.0
+    for _ in range(0, testTimes):
+
+        errorCount, errorRate = Test0(normdataSet, labels, testRatio)
+        totalErrorCount0 += errorCount
+        averageErrorRate0 += errorRate / float(testTimes)
+
+        errorCount, errorRate = Test0(normdataSet, labels, testRatio)
+        totalErrorCount1 += errorCount
+        averageErrorRate1 += errorRate / float(testTimes)
+
+    print("The total error times of general classifier is: {:}, of optimized classifier is: {:}".format(totalErrorCount0, totalErrorCount1))
+    print("The average error rate of general classifier is: {:.2%}, of optimized classifier is: {:.2%}".format(averageErrorRate0, averageErrorRate1))
+
+# 应用分类器
 def classifyFlowers(dataFile, forecastFile, k):
     """
     从CSV文件中读取10个鸢尾花的数据，预测并输出比较结果
@@ -139,7 +291,7 @@ def classifyFlowers(dataFile, forecastFile, k):
     :return: None
     """
 
-    print("Applying classifier on", forecastFile)
+    print("Applying classifier on" + forecastFile + " with optimized classifier")
 
     dataSet, labels, headers = file2matrix(dataFile)
     normdataSet, minVals, ranges = autoNorm(dataSet)
@@ -161,20 +313,29 @@ def classifyFlowers(dataFile, forecastFile, k):
 
     # 进行预测
     for x, y in zip(flowers, names):
-        flowerForecast = classify0(x, normdataSet, labels, k)
+        flowerForecast = classify1(x, normdataSet, labels, k)
         print("The classifier came back with %s, the real flower is: %s" % (flowerForecast, y))
 
 
 filename = 'iris.csv'
-k = 5
+k = 3
 testRatio = 0.2
 testfilename = 'simulated_iris_data0.csv'
 
-# 首先随机测试5次分类器
-print("Test the classifier with k = %d, test_ratio = %.2f" % (k, testRatio))
-for _ in range(4):
-    KNNTest(filename, k, testRatio)
+# 使用不同的 k 值测试普通分类器
+# for k0 in range(1, 20, 2):
+    # KNNTest0(filename, k0, testRatio)
+
+# 使用不同的 k 值测试加权距离优化分类器
+# for k1 in range(1, 20, 2):
+    # KNNTest1(filename, k1, testRatio)
+
+# 对比普通分类器以及优化分类器的性能
+print("Testing the classifier performance...")
+print("Compare performances of the two different classifiers on " + filename)
+for k2 in range(1, 20, 2):
+    KNNTest01(filename, k2, testRatio)
 
 # 应用分类器分类
-print("\nApplying classifier")
-# classifyFlowers(filename, testfilename, k)
+print("\nApplying classifier...")
+classifyFlowers(filename, testfilename, k)
