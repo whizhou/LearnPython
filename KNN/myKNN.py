@@ -185,7 +185,38 @@ def Test1(dataSet, labels, testRatio=0.2):
     # print("The total error number is:", errorCount)
     return errorCount, errorCount / float(numTest)
 
-# TODO 测试加权优化分类器性能
+# 测试普通分类器性能
+def KNNTest0(filename, k, testRatio=0.2, testTimes = 10):
+    """
+    首先读入数据，进行标准化；
+    然后进行10次随机划分测试，输出每次错误个数和错误率；
+    最后输出总错误个数以及平均错误率；
+    :param filename:
+    :param k:
+    :return:
+    """
+
+    print("\nTest the classifier performance on " + filename)
+    print("parameter: k = {:}, test ratio = {:}".format(k, testRatio))
+
+    dataSet, labels, headers = file2matrix(filename)
+    normdataSet, minVals, ranges = autoNorm(dataSet)
+
+    totalErrorCount = 0
+    averageErrorRate = 0.0
+    for _ in range(0, testTimes):
+        errorCount, errorRate = Test0(normdataSet, labels, testRatio)
+
+        # print("The {:}th error number is: {:}, error rate is: {:.2%}".format(_ + 1, errorCount, errorRate))
+
+        totalErrorCount += errorCount
+        averageErrorRate += errorRate / float(testTimes)
+
+    print("The total error times is: ", totalErrorCount)
+    print("The average error rate is: {:.2%}".format(averageErrorRate))
+
+
+# 测试加权优化分类器性能
 def KNNTest1(filename, k, testRatio=0.2, testTimes = 10):
     """
     首先读入数据，进行标准化；
@@ -213,11 +244,13 @@ def KNNTest1(filename, k, testRatio=0.2, testTimes = 10):
         averageErrorRate += errorRate / float(testTimes)
 
     print("The total error times is: ", totalErrorCount)
-    print("The average error is: {:.2%}".format(averageErrorRate))
+    print("The average error rate is: {:.2%}".format(averageErrorRate))
 
-# 测试普通分类器性能
-def KNNTest0(filename, k, testRatio=0.2, testTimes = 10):
+# 对比普通分类器和加权距离优化分类器性能
+# TODO 测试加权优化分类器性能
+def KNNTest01(filename, k, testRatio=0.2, testTimes = 10):
     """
+    使用相同的数据集划分对两种分类器进行性能测试，并进行对比
     首先读入数据，进行标准化；
     然后进行10次随机划分测试，输出每次错误个数和错误率；
     最后输出总错误个数以及平均错误率；
@@ -226,26 +259,27 @@ def KNNTest0(filename, k, testRatio=0.2, testTimes = 10):
     :return:
     """
 
-    print("\nTest the classifier performance on " + filename + "with no optimization")
-    print("parameter: k = {:}, test ratio = {:}".format(k, testRatio))
+    print("\n With parameter: k = {:}, test ratio = {:}".format(k, testRatio))
 
     dataSet, labels, headers = file2matrix(filename)
     normdataSet, minVals, ranges = autoNorm(dataSet)
 
-    totalErrorCount = 0
-    averageErrorRate = 0.0
+    totalErrorCount0 = 0
+    averageErrorRate0 = 0.0
+    totalErrorCount1 = 0
+    averageErrorRate1 = 0.0
     for _ in range(0, testTimes):
+
         errorCount, errorRate = Test0(normdataSet, labels, testRatio)
+        totalErrorCount0 += errorCount
+        averageErrorRate0 += errorRate / float(testTimes)
 
-        # print("The {:}th error number is: {:}, error rate is: {:.2%}".format(_ + 1, errorCount, errorRate))
+        errorCount, errorRate = Test0(normdataSet, labels, testRatio)
+        totalErrorCount1 += errorCount
+        averageErrorRate1 += errorRate / float(testTimes)
 
-        totalErrorCount += errorCount
-        averageErrorRate += errorRate / float(testTimes)
-
-    print("The total error times is: ", totalErrorCount)
-    print("The average error is: {:.2%}".format(averageErrorRate))
-
-# TODO 加权距离优化分类器性能测试
+    print("The total error times of general classifier is: {:}, of optimized classifier is: {:}".format(totalErrorCount0, totalErrorCount1))
+    print("The average error rate of general classifier is: {:.2%}, of optimized classifier is: {:.2%}".format(averageErrorRate0, averageErrorRate1))
 
 # 应用分类器
 def classifyFlowers(dataFile, forecastFile, k):
@@ -257,7 +291,7 @@ def classifyFlowers(dataFile, forecastFile, k):
     :return: None
     """
 
-    print("Applying classifier on", forecastFile)
+    print("Applying classifier on" + forecastFile + " with optimized classifier")
 
     dataSet, labels, headers = file2matrix(dataFile)
     normdataSet, minVals, ranges = autoNorm(dataSet)
@@ -297,10 +331,11 @@ testfilename = 'simulated_iris_data0.csv'
     # KNNTest1(filename, k1, testRatio)
 
 # 对比普通分类器以及优化分类器的性能
+print("Testing the classifier performance...")
+print("Compare performances of the two different classifiers on " + filename)
 for k2 in range(1, 20, 2):
-    KNNTest0(filename, k2, testRatio)
-    KNNTest1(filename, k2, testRatio)
+    KNNTest01(filename, k2, testRatio)
 
 # 应用分类器分类
-print("\nApplying classifier")
+print("\nApplying classifier...")
 classifyFlowers(filename, testfilename, k)
