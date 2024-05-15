@@ -303,4 +303,4 @@ for k2 in range(1, 20, 2):
 
 # 应用分类器分类
 print("\nApplying classifier")
-# classifyFlowers(filename, testfilename, k)
+classifyFlowers(filename, testfilename, k)
