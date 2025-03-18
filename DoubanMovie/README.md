@@ -1,1 +1,1 @@
-![要求](https://github.com/whizhou/LearnPython/DoubanMovie/assets/72209169/d640c199-1b43-48e7-ae9b-66d9c0bcc8a1)
+![要求](https://github.com/whizhou/LearnPython/DoubanMovie/requirments.png)
